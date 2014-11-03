@@ -1,4 +1,3 @@
-Android-Basic-Location-Demo
+Corvallis Transit
 ===========================
-
-Very, very simple app which connects all the pieces needed for getting a location and receiving location updates.
+Rewrite of Corvallis Transit for Android.
