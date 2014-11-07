@@ -50,11 +50,11 @@ public class GetStopsTask extends AsyncTask<Void, Void, List<Stop>> {
                 stops.add(stop);
             }
         } catch (JsonSyntaxException jse) {
-            Log.d("routes", jse.getMessage());
+            Log.d("stops", jse.getMessage());
         } catch (JsonIOException jio) {
-            Log.d("routes", jio.getMessage());
+            Log.d("stops", jio.getMessage());
         } catch (IllegalStateException ise) {
-            Log.d("routes", ise.getMessage());
+            Log.d("stops", ise.getMessage());
         }
 
         return stops;
