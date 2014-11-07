@@ -1,25 +1,19 @@
 package phillipcarter.com.mapsthing.model;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonIOException;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
-import phillipcarter.com.mapsthing.R;
 import phillipcarter.com.mapsthing.util.WebUtil;
 
 public class GetRoutesTask extends AsyncTask<Void, Void, List<Route>> {
@@ -43,9 +37,9 @@ public class GetRoutesTask extends AsyncTask<Void, Void, List<Route>> {
         try {
             JsonParser parser = new JsonParser();
             JsonArray jArray = parser.parse(json)
-                               .getAsJsonObject()
-                               .get("routes")
-                               .getAsJsonArray();
+                    .getAsJsonObject()
+                    .get("routes")
+                    .getAsJsonArray();
 
             for (JsonElement j : jArray) {
                 rte = gson.fromJson(j, Route.class);

@@ -1,37 +1,45 @@
 package phillipcarter.com.mapsthing.util;
 
-import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+
+import com.google.gson.Gson;
 
 import java.util.List;
 
 import phillipcarter.com.mapsthing.model.Route;
 
-public class WriteToCacheTask extends AsyncTask<Void, Void, Boolean> {
-    private Context mContext;
+public class WriteToCacheTask extends AsyncTask<Void, Void, Void> {
+    private SharedPreferences mSharedPreferences;
     private List<Route> mRoutes;
-    private String mFilename;
+    private String mRouteKey;
     private SystemCallbacks mCallbacks;
 
-    public WriteToCacheTask(Context context, SystemCallbacks callbacks,
-                            List<Route> routes, String filename) {
-        mContext = context;
+    public WriteToCacheTask(SharedPreferences sp, SystemCallbacks callbacks,
+                            List<Route> routes, String routeKey) {
+        mSharedPreferences = sp;
         mRoutes = routes;
-        mFilename = filename;
+        mRouteKey = routeKey;
         mCallbacks = callbacks;
     }
 
     @Override
-    protected Boolean doInBackground(Void... params) {
-        return SystemUtil.writeRoutesToCache(mContext, mRoutes, mFilename);
+    protected Void doInBackground(Void... params) {
+        String json = new Gson().toJson(mRoutes, mRoutes.getClass());
+        SharedPreferences.Editor editor = mSharedPreferences.edit();
+        editor.putString(mRouteKey, json);
+
+        // Explicitly commit() rather than apply() since this is running
+        // on a background thread.
+        editor.commit();
+
+        // Because of Java generics (or lack thereof), we have to return null
+        // to signify doing nothing.
+        return null;
     }
 
     @Override
-    protected void onPostExecute(Boolean success) {
-        if (success) {
-            mCallbacks.onWriteToCacheSuccess();
-        } else {
-            mCallbacks.onCacheOpError();
-        }
+    protected void onPostExecute(Void thing) {
+        mCallbacks.onWriteToCacheSuccess();
     }
 }

@@ -43,7 +43,7 @@ public class MapsActivity extends FragmentActivity implements
         SystemCallbacks {
     private final static int
             CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    private static final String ROUTE_CACHE_NAME = "route_cache";
+    private static final String ROUTE_CACHE_KEY = "route_cache";
     private static final String PREF_NAME = "cts_prefs";
     private static final String ROUTES_CACHED_PREF = "routes_cached";
     private GoogleMap mMap;
@@ -181,20 +181,20 @@ public class MapsActivity extends FragmentActivity implements
     /**
      * Callback for route retrieval.  Should only happen once,
      * since application cache should have the necessary info.
-     *
-     * Sticks a value in Shared Preferences so the application knows
-     * to hit the application cache rather than the network next time.
      */
     @Override
     public void onRouteParsed(List<Route> routes) {
         mRoutes = routes;
-        new WriteToCacheTask(this, this, routes, ROUTE_CACHE_NAME).execute();
+
+        new WriteToCacheTask(getSharedPreferences(PREF_NAME, MODE_PRIVATE),
+                this, mRoutes, ROUTE_CACHE_KEY)
+                .execute();
+
         mCached = true;
 
         SharedPreferences sp = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         SharedPreferences.Editor editor = sp.edit();
         editor.putBoolean(ROUTES_CACHED_PREF, mCached);
-
         editor.apply();
     }
 
@@ -252,7 +252,9 @@ public class MapsActivity extends FragmentActivity implements
     private void getRoutes() {
         if (mRoutes == null || mRoutes.isEmpty()) {
             if (mCached) {
-                new ReadFromCacheTask(this, this, ROUTE_CACHE_NAME).execute();
+                new ReadFromCacheTask(getSharedPreferences(PREF_NAME, MODE_PRIVATE),
+                        this, ROUTE_CACHE_KEY)
+                        .execute();
             } else {
                 new GetRoutesTask(this).execute();
             }
