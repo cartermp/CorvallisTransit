@@ -12,6 +12,9 @@ import java.util.List;
 import phillipcarter.com.mapsthing.model.Route;
 import phillipcarter.com.mapsthing.model.Tuple;
 
+/**
+ * Task for reading Route objects from shared preferences.
+ */
 public class ReadFromCacheTask extends AsyncTask<Void, Void, Tuple<Boolean, List<Route>>> {
     private SharedPreferences mSharedPreferences;
     private String mRouteKey;
@@ -29,6 +32,7 @@ public class ReadFromCacheTask extends AsyncTask<Void, Void, Tuple<Boolean, List
 
         Type routeTye = new TypeToken<List<Route>>() {
         }.getType();
+        
         List<Route> routes = new Gson().fromJson(json, routeTye);
 
         return Tuple.create(routes != null, routes);

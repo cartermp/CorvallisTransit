@@ -7,6 +7,9 @@ public class Tuple<T, U> {
     public final T item1;
     public final U item2;
 
+    /**
+     * Instantiates a new Tuple.
+     */
     public Tuple(T item1, U item2) {
         this.item1 = item1;
         this.item2 = item2;

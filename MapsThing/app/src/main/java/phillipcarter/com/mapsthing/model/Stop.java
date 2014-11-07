@@ -1,12 +1,12 @@
 package phillipcarter.com.mapsthing.model;
 
 public class Stop {
-    String Name;
-    String Road;
-    double Bearing;
-    boolean AdherancePoint;
-    double Lat;
-    double Long;
-    int Id;
-    double Distance;
+    public String Name;
+    public String Road;
+    public double Bearing;
+    public boolean AdherancePoint;
+    public double Lat;
+    public double Long;
+    public int Id;
+    public double Distance;
 }

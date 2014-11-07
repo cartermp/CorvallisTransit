@@ -8,6 +8,4 @@ public interface SystemCallbacks {
     public void onCacheOpError();
 
     public void onReadFromCacheSuccess(List<Route> routes);
-
-    public void onWriteToCacheSuccess();
 }

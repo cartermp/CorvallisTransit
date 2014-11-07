@@ -5,7 +5,6 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -21,15 +20,16 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
-import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.List;
 
 import phillipcarter.com.mapsthing.R;
 import phillipcarter.com.mapsthing.model.GetRoutesTask;
+import phillipcarter.com.mapsthing.model.GetStopsTask;
 import phillipcarter.com.mapsthing.model.Route;
+import phillipcarter.com.mapsthing.model.Stop;
 import phillipcarter.com.mapsthing.model.TransitCallbacks;
 import phillipcarter.com.mapsthing.model.Tuple;
 import phillipcarter.com.mapsthing.util.ReadFromCacheTask;
@@ -94,46 +94,18 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     /**
-     * Grabs a map UI element if no map exists.
+     * Callback for when the phone connects to Google Play Services.
+     * Performs location-related setup when this happens.
      */
-    private void getMapIfNeeded() {
-        if (mMap == null) {
-            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
-                    .getMap();
-        }
-    }
-
-    /**
-     * Performs setup operations on the map based on a given location.
-     */
-    private void setUpMap(Location location) {
-        LatLng latLng = (location == null)
-                ? new LatLng(0, 0)
-                : new LatLng(location.getLatitude(),
-                location.getLongitude());
-
-        CircleOptions circleOptions = new CircleOptions()
-                .center(latLng)
-                .radius(100);
-
-        mMap.setMyLocationEnabled(true);
-
-        CameraPosition cameraPosition = new CameraPosition.Builder()
-                .target(latLng)
-                .zoom(15)
-                .build();
-
-        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
-        Circle circle = mMap.addCircle(circleOptions);
-
-        circle.setFillColor(Color.rgb(255, 165, 0));
-    }
-
     @Override
     public void onConnected(Bundle bundle) {
         Location location = mLocationClient.getLastLocation();
 
-        // spin off task to get stops by location
+        if (location != null) {
+            new GetStopsTask(this, location.getLatitude(),
+                    location.getLongitude())
+                    .execute();
+        }
 
         if (mMap != null) {
             setUpMap(location);
@@ -150,8 +122,6 @@ public class MapsActivity extends FragmentActivity implements
 
     /**
      * TODO: something meaningful when connectionResult has no resolution
-     *
-     * @param connectionResult
      */
     @Override
     public void onConnectionFailed(ConnectionResult connectionResult) {
@@ -165,6 +135,10 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
+    /**
+     * Explicitly connects the Location Client before onResume() is called
+     * when the Activity is restarting.
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == CONNECTION_FAILURE_RESOLUTION_REQUEST &&
@@ -173,6 +147,11 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
+    /**
+     * Callback for when a network error occurs when fetching transit info
+     * from the network.  Instantiates and launches an ErrorDialog Fragment
+     * to let the user know the network call failed.
+     */
     @Override
     public void onTaskFailed() {
         // create error dialog
@@ -183,11 +162,11 @@ public class MapsActivity extends FragmentActivity implements
      * since application cache should have the necessary info.
      */
     @Override
-    public void onRouteParsed(List<Route> routes) {
+    public void onRoutesFetched(List<Route> routes) {
         mRoutes = routes;
 
         new WriteToCacheTask(getSharedPreferences(PREF_NAME, MODE_PRIVATE),
-                this, mRoutes, ROUTE_CACHE_KEY)
+                mRoutes, ROUTE_CACHE_KEY)
                 .execute();
 
         mCached = true;
@@ -196,6 +175,15 @@ public class MapsActivity extends FragmentActivity implements
         SharedPreferences.Editor editor = sp.edit();
         editor.putBoolean(ROUTES_CACHED_PREF, mCached);
         editor.apply();
+    }
+
+    /**
+     * Callback for stop retreival.  The map is updated with new markers
+     * once this is called.
+     */
+    @Override
+    public void onStopsFetched(List<Stop> stops) {
+        setMapMakers(stops);
     }
 
     /**
@@ -213,12 +201,6 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onReadFromCacheSuccess(List<Route> routes) {
         mRoutes = routes;
-        Toast.makeText(this, "got routes from cache!", Toast.LENGTH_SHORT).show();
-    }
-
-    @Override
-    public void onWriteToCacheSuccess() {
-        Toast.makeText(this, "wrote to cache!", Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -249,6 +231,9 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
+    /**
+     * Method to get CTS route info either from the network or the local cache.
+     */
     private void getRoutes() {
         if (mRoutes == null || mRoutes.isEmpty()) {
             if (mCached) {
@@ -258,6 +243,45 @@ public class MapsActivity extends FragmentActivity implements
             } else {
                 new GetRoutesTask(this).execute();
             }
+        }
+    }
+
+    /**
+     * Grabs a map UI element if no map exists.
+     */
+    private void getMapIfNeeded() {
+        if (mMap == null) {
+            mMap = ((SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map))
+                    .getMap();
+        }
+    }
+
+    /**
+     * Performs setup operations on the map based on a given location.
+     */
+    private void setUpMap(Location location) {
+        LatLng latLng = (location == null)
+                ? new LatLng(0, 0)
+                : new LatLng(location.getLatitude(),
+                location.getLongitude());
+
+        mMap.setMyLocationEnabled(true);
+
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(latLng)
+                .zoom(15)
+                .build();
+
+        mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+    }
+
+    /**
+     * Sets markers corresponding to the list of stops on the map.
+     */
+    private void setMapMakers(List<Stop> stops) {
+        for (Stop s : stops) {
+            mMap.addMarker(new MarkerOptions()
+                    .position(new LatLng(s.Lat, s.Long)));
         }
     }
 

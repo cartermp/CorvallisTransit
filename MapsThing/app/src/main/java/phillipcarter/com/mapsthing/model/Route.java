@@ -3,12 +3,12 @@ package phillipcarter.com.mapsthing.model;
 import java.util.List;
 
 public class Route {
-    String Name;
-    String AdditionalName;
-    String Descriptions;
-    String Url;
-    String Polyline;
-    String Color;
-    String Direction;
-    List<Stop> Path;
+    public String Name;
+    public String AdditionalName;
+    public String Descriptions;
+    public String Url;
+    public String Polyline;
+    public String Color;
+    public String Direction;
+    public List<Stop> Path;
 }

@@ -9,18 +9,18 @@ import java.util.List;
 
 import phillipcarter.com.mapsthing.model.Route;
 
+/**
+ * Task for writing Route objects to Shared Preferences.
+ */
 public class WriteToCacheTask extends AsyncTask<Void, Void, Void> {
     private SharedPreferences mSharedPreferences;
     private List<Route> mRoutes;
     private String mRouteKey;
-    private SystemCallbacks mCallbacks;
 
-    public WriteToCacheTask(SharedPreferences sp, SystemCallbacks callbacks,
-                            List<Route> routes, String routeKey) {
+    public WriteToCacheTask(SharedPreferences sp, List<Route> routes, String routeKey) {
         mSharedPreferences = sp;
         mRoutes = routes;
         mRouteKey = routeKey;
-        mCallbacks = callbacks;
     }
 
     @Override
@@ -36,10 +36,5 @@ public class WriteToCacheTask extends AsyncTask<Void, Void, Void> {
         // Because of Java generics (or lack thereof), we have to return null
         // to signify doing nothing.
         return null;
-    }
-
-    @Override
-    protected void onPostExecute(Void thing) {
-        mCallbacks.onWriteToCacheSuccess();
     }
 }
