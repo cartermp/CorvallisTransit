@@ -56,10 +56,12 @@ public class MapsActivity extends FragmentActivity implements
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_maps);
 
+        mLocationClient = new LocationClient(this, this, this);
+
         SharedPreferences settings = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
         mCached = settings.getBoolean(ROUTES_CACHED_PREF, false);
 
-        mLocationClient = new LocationClient(this, this, this);
+        getRoutes();
     }
 
     /**
@@ -186,7 +188,7 @@ public class MapsActivity extends FragmentActivity implements
     @Override
     public void onRouteParsed(List<Route> routes) {
         mRoutes = routes;
-        new WriteToCacheTask(this, routes, ROUTE_CACHE_NAME).execute();
+        new WriteToCacheTask(this, this, routes, ROUTE_CACHE_NAME).execute();
         mCached = true;
 
         SharedPreferences sp = getSharedPreferences(PREF_NAME, MODE_PRIVATE);
@@ -198,20 +200,25 @@ public class MapsActivity extends FragmentActivity implements
 
     /**
      * Callback for when routes cannot be read from the cache.
-     * If this happens, hit the network for new routes, which will
-     * then write to the cache again.
+     * If this happens, uh-oh?
      */
     @Override
     public void onCacheOpError() {
-        new GetRoutesTask(this).execute();
+        //new GetRoutesTask(this, this).execute();
     }
 
     /**
      * Callback for when routes are read from the cache.
      */
     @Override
-    public void onCacheOpSuccess(List<Route> routes) {
+    public void onReadFromCacheSuccess(List<Route> routes) {
         mRoutes = routes;
+        Toast.makeText(this, "got routes from cache!", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onWriteToCacheSuccess() {
+        Toast.makeText(this, "wrote to cache!", Toast.LENGTH_LONG).show();
     }
 
     /**
@@ -242,10 +249,10 @@ public class MapsActivity extends FragmentActivity implements
         }
     }
 
-    private void getRoutesIfNeeded() {
+    private void getRoutes() {
         if (mRoutes == null || mRoutes.isEmpty()) {
             if (mCached) {
-                new ReadFromCacheTask(this, this, ROUTE_CACHE_NAME);
+                new ReadFromCacheTask(this, this, ROUTE_CACHE_NAME).execute();
             } else {
                 new GetRoutesTask(this).execute();
             }

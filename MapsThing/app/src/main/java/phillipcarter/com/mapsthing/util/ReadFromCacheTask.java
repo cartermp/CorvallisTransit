@@ -21,13 +21,13 @@ public class ReadFromCacheTask extends AsyncTask<Void, Void, Tuple<Boolean, List
 
     @Override
     protected Tuple<Boolean, List<Route>> doInBackground(Void... params) {
-        return SystemUtil.getRoutes(mContext, mFilename);
+        return SystemUtil.getRoutesFromCache(mContext, mFilename);
     }
 
     @Override
     protected void onPostExecute(Tuple<Boolean, List<Route>> result) {
         if (result.item1) {
-            mCallbacks.onCacheOpSuccess(result.item2);
+            mCallbacks.onReadFromCacheSuccess(result.item2);
         } else {
             mCallbacks.onCacheOpError();
         }

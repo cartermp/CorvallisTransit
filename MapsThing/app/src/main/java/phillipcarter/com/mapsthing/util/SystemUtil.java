@@ -1,8 +1,10 @@
 package phillipcarter.com.mapsthing.util;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.BufferedReader;
@@ -29,7 +31,7 @@ public class SystemUtil {
     /**
      * Attempts to get routes from the application's cache file.
      */
-    public static Tuple<Boolean, List<Route>> getRoutes(Context ctx, String fileName) {
+    public static Tuple<Boolean, List<Route>> getRoutesFromCache(Context ctx, String fileName) {
         Gson gson = new Gson();
         Type routeType = new TypeToken<List<Route>>() {
         }.getType();
@@ -52,16 +54,13 @@ public class SystemUtil {
     /**
      * Attempts to write a list of routes to the application's cache file.
      */
-    public static boolean writeRoutesToFile(Context ctx, List<Route> routes, String fileName) {
-        Gson gson = new Gson();
-        Type routeType = new TypeToken<List<Route>>() {
-        }.getType();
-
-        String json = gson.toJson(routes, routeType);
+    public static boolean writeRoutesToCache(Context ctx, List<Route> routes, String name) {
+        String json =  new Gson().toJson(routes, routes.getClass());
 
         try {
-            File f = ctx.getCacheDir();
-            FileOutputStream fos = new FileOutputStream(f);
+            File cacheDir = ctx.getCacheDir();
+            File routesCache = new File(cacheDir.getPath() + "/" + name);
+            FileOutputStream fos = new FileOutputStream(routesCache);
             writeString(fos, json);
             fos.close();
         } catch (FileNotFoundException ex) {

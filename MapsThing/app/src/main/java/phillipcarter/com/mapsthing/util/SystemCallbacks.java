@@ -7,5 +7,7 @@ import phillipcarter.com.mapsthing.model.Route;
 public interface SystemCallbacks {
     public void onCacheOpError();
 
-    public void onCacheOpSuccess(List<Route> routes);
+    public void onReadFromCacheSuccess(List<Route> routes);
+
+    public void onWriteToCacheSuccess();
 }
