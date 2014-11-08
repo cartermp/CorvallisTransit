@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -21,7 +22,9 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.List;
 
@@ -50,6 +53,7 @@ public class MapsActivity extends FragmentActivity implements
     private LocationClient mLocationClient;
     private List<Route> mRoutes;
     private boolean mCached;
+    private SlidingUpPanelLayout mStopSlide;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +66,7 @@ public class MapsActivity extends FragmentActivity implements
         mCached = settings.getBoolean(ROUTES_CACHED_PREF, false);
 
         getRoutes();
+        setUpStopSlider();
     }
 
     /**
@@ -91,6 +96,21 @@ public class MapsActivity extends FragmentActivity implements
     protected void onStop() {
         mLocationClient.disconnect();
         super.onStop();
+    }
+
+    /**
+     * Handles toggling the view of the Stop Slider.
+     */
+    @Override
+    public void onBackPressed() {
+        if (mStopSlide != null &&
+                (mStopSlide.isPanelExpanded() || mStopSlide.isPanelAnchored())) {
+            mStopSlide.collapsePanel();
+        } else if (mStopSlide != null && !mStopSlide.isPanelHidden()) {
+            mStopSlide.hidePanel();
+        } else {
+            super.onBackPressed();
+        }
     }
 
     /**
@@ -269,10 +289,27 @@ public class MapsActivity extends FragmentActivity implements
 
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(latLng)
-                .zoom(15)
+                .zoom(16)
                 .build();
 
         mMap.moveCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                LatLng latLng = marker.getPosition();
+                MapsActivity.this.mStopSlide.showPanel();
+                return false;
+            }
+        });
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                SlidingUpPanelLayout slider = MapsActivity.this.mStopSlide;
+                if (slider != null && !slider.isPanelHidden()) {
+                    slider.hidePanel();
+                }
+            }
+        });
     }
 
     /**
@@ -283,6 +320,37 @@ public class MapsActivity extends FragmentActivity implements
             mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(s.Lat, s.Long)));
         }
+    }
+
+    private void setUpStopSlider() {
+        mStopSlide = (SlidingUpPanelLayout) findViewById(R.id.route_slide);
+        mStopSlide.hidePanel();
+        mStopSlide.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
+            @Override
+            public void onPanelSlide(View view, float v) {
+
+            }
+
+            @Override
+            public void onPanelCollapsed(View view) {
+
+            }
+
+            @Override
+            public void onPanelExpanded(View view) {
+
+            }
+
+            @Override
+            public void onPanelAnchored(View view) {
+
+            }
+
+            @Override
+            public void onPanelHidden(View view) {
+
+            }
+        });
     }
 
     /**
