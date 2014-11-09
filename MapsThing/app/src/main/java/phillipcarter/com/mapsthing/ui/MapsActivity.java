@@ -29,6 +29,8 @@ import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 import java.util.List;
 
 import phillipcarter.com.mapsthing.R;
+import phillipcarter.com.mapsthing.model.Arrival;
+import phillipcarter.com.mapsthing.model.GetArrivalTask;
 import phillipcarter.com.mapsthing.model.GetRoutesTask;
 import phillipcarter.com.mapsthing.model.GetStopsTask;
 import phillipcarter.com.mapsthing.model.Route;
@@ -52,6 +54,7 @@ public class MapsActivity extends FragmentActivity implements
     private GoogleMap mMap;
     private LocationClient mLocationClient;
     private List<Route> mRoutes;
+    private List<Stop> mCurrentDisplayedStops;
     private boolean mCached;
     private SlidingUpPanelLayout mStopSlide;
 
@@ -198,12 +201,18 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     /**
-     * Callback for stop retreival.  The map is updated with new markers
+     * Callback for stop retrieval.  The map is updated with new markers
      * once this is called.
      */
     @Override
     public void onStopsFetched(List<Stop> stops) {
         setMapMakers(stops);
+        mCurrentDisplayedStops = stops;
+    }
+
+    @Override
+    public void onArrivalsForStopFetched(List<Arrival> arrivals) {
+        // fill stop slider
     }
 
     /**
@@ -296,7 +305,9 @@ public class MapsActivity extends FragmentActivity implements
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                LatLng latLng = marker.getPosition();
+                new GetArrivalTask(MapsActivity.this, marker.getPosition(),
+                        MapsActivity.this.mCurrentDisplayedStops)
+                        .execute();
                 MapsActivity.this.mStopSlide.showPanel();
                 return false;
             }

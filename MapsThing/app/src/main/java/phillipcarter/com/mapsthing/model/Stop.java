@@ -7,6 +7,6 @@ public class Stop {
     public boolean AdherancePoint;
     public double Lat;
     public double Long;
-    public int Id;
+    public int ID;
     public double Distance;
 }

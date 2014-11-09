@@ -18,4 +18,10 @@ public interface TransitCallbacks {
      * Used to signify when stops are fetched from the network successfully.
      */
     public void onStopsFetched(List<Stop> stops);
+
+    /**
+     * Used to signify when a list of arrivals for a stop are fetched from
+     * the network successfully.
+     */
+    public void onArrivalsForStopFetched(List<Arrival> arrivals);
 }

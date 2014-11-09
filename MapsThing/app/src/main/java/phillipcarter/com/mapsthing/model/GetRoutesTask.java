@@ -1,14 +1,11 @@
 package phillipcarter.com.mapsthing.model;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -32,25 +29,15 @@ public class GetRoutesTask extends AsyncTask<Void, Void, List<Route>> {
 
         Gson gson = new Gson();
         List<Route> routes = new ArrayList<Route>();
-        Route rte = null;
 
-        try {
-            JsonParser parser = new JsonParser();
-            JsonArray jArray = parser.parse(json)
-                    .getAsJsonObject()
-                    .get("routes")
-                    .getAsJsonArray();
+        JsonParser parser = new JsonParser();
+        JsonArray jArray = parser.parse(json)
+                .getAsJsonObject()
+                .get("routes")
+                .getAsJsonArray();
 
-            for (JsonElement j : jArray) {
-                rte = gson.fromJson(j, Route.class);
-                routes.add(rte);
-            }
-        } catch (JsonSyntaxException jse) {
-            Log.d("routes", jse.getMessage());
-        } catch (JsonIOException jio) {
-            Log.d("routes", jio.getMessage());
-        } catch (IllegalStateException ise) {
-            Log.d("routes", ise.getMessage());
+        for (JsonElement j : jArray) {
+            routes.add(gson.fromJson(j, Route.class));
         }
 
         return routes;

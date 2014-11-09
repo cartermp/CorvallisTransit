@@ -1,14 +1,11 @@
 package phillipcarter.com.mapsthing.model;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,7 +18,7 @@ public class GetStopsTask extends AsyncTask<Void, Void, List<Stop>> {
     private double mLng;
     private TransitCallbacks mCallbacks;
 
-    public GetStopsTask(TransitCallbacks callbacks, double   lat, double lng) {
+    public GetStopsTask(TransitCallbacks callbacks, double lat, double lng) {
         mCallbacks = callbacks;
         mLat = lat;
         mLng = lng;
@@ -36,25 +33,15 @@ public class GetStopsTask extends AsyncTask<Void, Void, List<Stop>> {
 
         Gson gson = new Gson();
         List<Stop> stops = new ArrayList<Stop>();
-        Stop stop = null;
 
-        try {
-            JsonParser parser = new JsonParser();
-            JsonArray jArray = parser.parse(json)
-                    .getAsJsonObject()
-                    .get("stops")
-                    .getAsJsonArray();
+        JsonParser parser = new JsonParser();
+        JsonArray jArray = parser.parse(json)
+                .getAsJsonObject()
+                .get("stops")
+                .getAsJsonArray();
 
-            for (JsonElement j : jArray) {
-                stop = gson.fromJson(j, Stop.class);
-                stops.add(stop);
-            }
-        } catch (JsonSyntaxException jse) {
-            Log.d("stops", jse.getMessage());
-        } catch (JsonIOException jio) {
-            Log.d("stops", jio.getMessage());
-        } catch (IllegalStateException ise) {
-            Log.d("stops", ise.getMessage());
+        for (JsonElement j : jArray) {
+            stops.add(gson.fromJson(j, Stop.class));
         }
 
         return stops;
