@@ -35,12 +35,39 @@
                 android:layout_height="68dp"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:layout_width="match_parent"
+                <LinearLayout
+                    android:id="@+id/stopinfolayout"
+                    android:layout_width="wrap_content"
                     android:layout_height="match_parent"
-                    android:gravity="center|top"
-                    android:text="hey there fancy pants"
-                    android:textSize="16sp" />
+                    android:layout_weight="8"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/eta_text"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:paddingLeft="10dp"
+                        android:text="5 Minutes"
+                        android:textSize="28sp"/>
+
+                    <TextView
+                        android:id="@+id/stop_name"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center_horizontal"
+                        android:text="NW Witham Hill Dr and NW Woodland Dr"/>
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:paddingRight="15dp"
+                    android:text="8"
+                    android:textSize="45sp"
+                    android:layout_gravity="center"
+                    android:layout_weight="2"/>
 
             </LinearLayout>
 

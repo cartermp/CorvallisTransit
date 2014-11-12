@@ -13,7 +13,7 @@ import java.util.List;
 
 import phillipcarter.com.mapsthing.util.WebUtil;
 
-public class GetStopsTask extends AsyncTask<Void, Void, List<Stop>> {
+public class GetStopsTask extends AsyncTask<Void, Void, Tuple<Boolean, List<Stop>>> {
     private double mLat;
     private double mLng;
     private TransitCallbacks mCallbacks;
@@ -24,9 +24,18 @@ public class GetStopsTask extends AsyncTask<Void, Void, List<Stop>> {
         mLng = lng;
     }
 
+    /**
+     * Returns a Tuple indicating whether or not there was a network error,
+     * and the List of Stops.
+     */
     @Override
-    protected List<Stop> doInBackground(Void... params) {
-        String json = fetchStops();
+    protected Tuple<Boolean, List<Stop>> doInBackground(Void... params) {
+        Tuple<Boolean, String> result = fetchStops();
+        if (result.item1) {
+            return Tuple.create(true, null);
+        }
+
+        String json = result.item2;
         if (json == null || json.isEmpty()) {
             return null;
         }
@@ -44,15 +53,17 @@ public class GetStopsTask extends AsyncTask<Void, Void, List<Stop>> {
             stops.add(gson.fromJson(j, Stop.class));
         }
 
-        return stops;
+        return Tuple.create(false, stops);
     }
 
     @Override
-    protected void onPostExecute(List<Stop> stops) {
-        if (stops == null || stops.isEmpty()) {
-            mCallbacks.onTaskFailed();
+    protected void onPostExecute(Tuple<Boolean, List<Stop>> result) {
+        if (result.item1) {
+            mCallbacks.onNetworkError();
+        } else if (result.item2 == null || result.item2.isEmpty()) {
+            mCallbacks.onNoTransitInfo();
         } else {
-            mCallbacks.onStopsFetched(stops);
+            mCallbacks.onStopsFetched(result.item2);
         }
     }
 
@@ -60,8 +71,9 @@ public class GetStopsTask extends AsyncTask<Void, Void, List<Stop>> {
      * Gets json-encoded stops within a (default) 500 meter radius
      * of the provided lat/lng, with a limit of 20 stops.
      */
-    private String fetchStops() {
+    private Tuple<Boolean, String> fetchStops() {
         String json = "";
+        boolean networkError = false;
         try {
             json = WebUtil.downloadUrl(
                     "http://www.corvallis-bus.appspot.com/stops" +
@@ -69,9 +81,9 @@ public class GetStopsTask extends AsyncTask<Void, Void, List<Stop>> {
                             "&limit=20"
             );
         } catch (IOException ioe) {
-            // maybe do something
+            networkError = true;
         }
 
-        return json;
+        return Tuple.create(networkError, json);
     }
 }

@@ -13,16 +13,25 @@ import java.util.List;
 
 import phillipcarter.com.mapsthing.util.WebUtil;
 
-public class GetRoutesTask extends AsyncTask<Void, Void, List<Route>> {
+public class GetRoutesTask extends AsyncTask<Void, Void, Tuple<Boolean, List<Route>>> {
     TransitCallbacks mCallbacks;
 
     public GetRoutesTask(TransitCallbacks callbacks) {
         mCallbacks = callbacks;
     }
 
+    /**
+     * Returns a Tuple containing whether or not there was a network error,
+     * and a List of routes.
+     */
     @Override
-    protected List<Route> doInBackground(Void... params) {
-        String json = getRouteData();
+    protected Tuple<Boolean, List<Route>> doInBackground(Void... params) {
+        Tuple<Boolean, String> result = getRouteData();
+        if (result.item1) {
+            return Tuple.create(true, null);
+        }
+
+        String json = result.item2;
         if (json == null || json.isEmpty()) {
             return null;
         }
@@ -40,27 +49,30 @@ public class GetRoutesTask extends AsyncTask<Void, Void, List<Route>> {
             routes.add(gson.fromJson(j, Route.class));
         }
 
-        return routes;
+        return Tuple.create(false, routes);
     }
 
     @Override
-    protected void onPostExecute(List<Route> routes) {
-        if (routes == null || routes.isEmpty()) {
-            mCallbacks.onTaskFailed();
+    protected void onPostExecute(Tuple<Boolean, List<Route>> result) {
+        if (result.item1) {
+            mCallbacks.onNetworkError();
+        } else if (result.item2 == null || result.item2.isEmpty()) {
+            mCallbacks.onNoTransitInfo();
         } else {
-            mCallbacks.onRoutesFetched(routes);
+            mCallbacks.onRoutesFetched(result.item2);
         }
     }
 
-    private String getRouteData() {
+    private Tuple<Boolean, String> getRouteData() {
         String json = "";
+        boolean networkError = false;
 
         try {
             json = WebUtil.downloadUrl("http://www.corvallis-bus.appspot.com/routes?stops=true");
         } catch (IOException e) {
-            // maybe do something
+           networkError = true;
         }
 
-        return json;
+        return Tuple.create(networkError, json);
     }
 }

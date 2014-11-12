@@ -14,29 +14,30 @@ import java.util.List;
 
 import phillipcarter.com.mapsthing.util.WebUtil;
 
-public class GetArrivalTask extends AsyncTask<Void, Void, List<Arrival>> {
+public class GetArrivalsTask extends AsyncTask<Void, Void, Tuple<Boolean, List<Arrival>>> {
     private TransitCallbacks mCallbacks;
     private LatLng mMarkerLatLng;
     private List<Stop> mStops;
 
-    public GetArrivalTask(TransitCallbacks callbacks, LatLng latng, List<Stop> stops) {
+    public GetArrivalsTask(TransitCallbacks callbacks, LatLng latng, List<Stop> stops) {
         mCallbacks = callbacks;
         mMarkerLatLng = latng;
         mStops = stops;
     }
 
-    private static String getArrivalString(Stop stop) {
+    private static Tuple<Boolean, String> getArrivalString(Stop stop) {
         String json = null;
+        boolean networkError = false;
 
         try {
             json = WebUtil.downloadUrl(
                     "http://www.corvallis-bus.appspot.com/arrivals" +
                             "?stops=" + stop.ID);
         } catch (IOException ioe) {
-            // do something maybe
+            networkError = true;
         }
 
-        return json;
+        return Tuple.create(networkError, json);
     }
 
     /**
@@ -69,14 +70,24 @@ public class GetArrivalTask extends AsyncTask<Void, Void, List<Arrival>> {
                 Math.abs(lng1 - lng2) < longitudeLeeway;
     }
 
+    /**
+     * Returns a Tuple containing whether or not a network error occured,
+     * and a List of Arrivals.
+     */
     @Override
-    protected List<Arrival> doInBackground(Void... params) {
+    protected Tuple<Boolean, List<Arrival>> doInBackground(Void... params) {
         Stop stop = findStopByLatLng(mStops, mMarkerLatLng);
         if (stop == null) {
             return null;
         }
 
-        String json = getArrivalString(stop);
+        Tuple<Boolean, String> result = getArrivalString(stop);
+        if (result.item1) {
+            return Tuple.create(true, null);
+        }
+
+        String json = result.item2;
+
         if (json == null || json.isEmpty()) {
             return null;
         }
@@ -94,15 +105,17 @@ public class GetArrivalTask extends AsyncTask<Void, Void, List<Arrival>> {
             arrivals.add(gson.fromJson(je, Arrival.class));
         }
 
-        return arrivals;
+        return Tuple.create(false, arrivals);
     }
 
     @Override
-    protected void onPostExecute(List<Arrival> arrivals) {
-        if (arrivals == null || arrivals.isEmpty()) {
-            mCallbacks.onTaskFailed();
+    protected void onPostExecute(Tuple<Boolean, List<Arrival>> result) {
+        if (result.item1) {
+            mCallbacks.onNetworkError();
+        } else if (result.item2 == null || result.item2.isEmpty()){
+            mCallbacks.onNoTransitInfo();
         } else {
-            mCallbacks.onArrivalsForStopFetched(arrivals);
+            mCallbacks.onArrivalsForStopFetched(result.item2);
         }
     }
 }

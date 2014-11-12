@@ -11,6 +11,7 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -24,13 +25,15 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.r0adkll.postoffice.PostOffice;
+import com.r0adkll.postoffice.model.Design;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.List;
 
 import phillipcarter.com.mapsthing.R;
 import phillipcarter.com.mapsthing.model.Arrival;
-import phillipcarter.com.mapsthing.model.GetArrivalTask;
+import phillipcarter.com.mapsthing.model.GetArrivalsTask;
 import phillipcarter.com.mapsthing.model.GetRoutesTask;
 import phillipcarter.com.mapsthing.model.GetStopsTask;
 import phillipcarter.com.mapsthing.model.Route;
@@ -171,13 +174,29 @@ public class MapsActivity extends FragmentActivity implements
     }
 
     /**
-     * Callback for when a network error occurs when fetching transit info
-     * from the network.  Instantiates and launches an ErrorDialog Fragment
-     * to let the user know the network call failed.
+     * Callback for when some network error occurs when getting transit info.
      */
     @Override
-    public void onTaskFailed() {
-        // create error dialog
+    public void onNetworkError() {
+        PostOffice.newMail(this)
+                .setTitle("Network Error")
+                .setMessage("Problem getting transit info from the network.")
+                .setDesign(Design.MATERIAL_LIGHT)
+                .setCanceledOnTouchOutside(true)
+                .show(getSupportFragmentManager());
+    }
+
+    /**
+     * Callback for when some error occurs that isn't related to the network.
+     */
+    @Override
+    public void onNoTransitInfo() {
+        PostOffice.newMail(this)
+                .setTitle("No Scheduled Times")
+                .setMessage("This stop has no bus running right now.")
+                .setDesign(Design.MATERIAL_LIGHT)
+                .setCanceledOnTouchOutside(true)
+                .show(getSupportFragmentManager());
     }
 
     /**
@@ -210,9 +229,12 @@ public class MapsActivity extends FragmentActivity implements
         mCurrentDisplayedStops = stops;
     }
 
+    /**
+     * Callback for arrivals retrieval for a particular stop.  Opens Stop slideview.
+     */
     @Override
     public void onArrivalsForStopFetched(List<Arrival> arrivals) {
-        // fill stop slider
+        this.mStopSlide.showPanel();
     }
 
     /**
@@ -236,7 +258,7 @@ public class MapsActivity extends FragmentActivity implements
      * Checks if the device can connect to GPlay services.
      *
      * @return A tuple containing the result code of the service call,
-     * and a boolean representing if the service GPlay services were available.
+     * and a boolean representing if GPlay services were available.
      */
     private Tuple<Integer, Boolean> servicesConnected() {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(this);
@@ -305,10 +327,9 @@ public class MapsActivity extends FragmentActivity implements
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {
-                new GetArrivalTask(MapsActivity.this, marker.getPosition(),
+                new GetArrivalsTask(MapsActivity.this, marker.getPosition(),
                         MapsActivity.this.mCurrentDisplayedStops)
                         .execute();
-                MapsActivity.this.mStopSlide.showPanel();
                 return false;
             }
         });

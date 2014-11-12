@@ -5,9 +5,14 @@ import java.util.List;
 public interface TransitCallbacks {
 
     /**
-     * Used to signify when a network task for getting transit info fails.
+     * Used to signify when a network error occurs.
      */
-    public void onTaskFailed();
+    public void onNetworkError();
+
+    /**
+     * Used to signify when there was no transit info from the server to handle.
+     */
+    public void onNoTransitInfo();
 
     /**
      * Used to signify when routes are fetched from the network successfully.
