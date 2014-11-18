@@ -26,4 +26,6 @@ dependencies {
     compile 'com.sothree.slidinguppanel:library:+'
     compile 'joda-time:joda-time:2.5'
     compile 'com.r0adkll:postoffice:1.1.4'
+    compile 'com.getbase:floatingactionbutton:1.1.0'
+    compile 'com.jakewharton:butterknife:6.0.0'
 }

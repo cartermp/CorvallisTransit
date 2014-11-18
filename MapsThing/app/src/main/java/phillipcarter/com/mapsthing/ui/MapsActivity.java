@@ -11,9 +11,9 @@ import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentActivity;
 import android.util.Log;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 
+import com.getbase.floatingactionbutton.FloatingActionButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesClient;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -25,10 +25,12 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.r0adkll.postoffice.PostOffice;
 import com.r0adkll.postoffice.model.Design;
-import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
+import java.lang.reflect.Type;
 import java.util.List;
 
 import phillipcarter.com.mapsthing.R;
@@ -51,15 +53,15 @@ public class MapsActivity extends FragmentActivity implements
         SystemCallbacks {
     private final static int
             CONNECTION_FAILURE_RESOLUTION_REQUEST = 9000;
-    private static final String ROUTE_CACHE_KEY = "route_cache";
-    private static final String PREF_NAME = "cts_prefs";
-    private static final String ROUTES_CACHED_PREF = "routes_cached";
+    static final String ROUTE_CACHE_KEY = "route_cache";
+    static final String PREF_NAME = "cts_prefs";
+    static final String ROUTES_CACHED_PREF = "routes_cached";
+    static final String ROUTES_INTENT_KEY = "routes";
     private GoogleMap mMap;
     private LocationClient mLocationClient;
     private List<Route> mRoutes;
     private List<Stop> mCurrentDisplayedStops;
     private boolean mCached;
-    private SlidingUpPanelLayout mStopSlide;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -72,7 +74,18 @@ public class MapsActivity extends FragmentActivity implements
         mCached = settings.getBoolean(ROUTES_CACHED_PREF, false);
 
         getRoutes();
-        setUpStopSlider();
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent routesActivityIntent = new Intent(MapsActivity.this, RoutesActivity.class);
+                Type routesType = new TypeToken<List<Route>>(){}.getType();
+                String json = new Gson().toJson(mRoutes, routesType);
+                routesActivityIntent.putExtra(ROUTES_INTENT_KEY, json);
+                startActivity(routesActivityIntent);
+            }
+        });
     }
 
     /**
@@ -102,21 +115,6 @@ public class MapsActivity extends FragmentActivity implements
     protected void onStop() {
         mLocationClient.disconnect();
         super.onStop();
-    }
-
-    /**
-     * Handles toggling the view of the Stop Slider.
-     */
-    @Override
-    public void onBackPressed() {
-        if (mStopSlide != null &&
-                (mStopSlide.isPanelExpanded() || mStopSlide.isPanelAnchored())) {
-            mStopSlide.collapsePanel();
-        } else if (mStopSlide != null && !mStopSlide.isPanelHidden()) {
-            mStopSlide.hidePanel();
-        } else {
-            super.onBackPressed();
-        }
     }
 
     /**
@@ -234,7 +232,7 @@ public class MapsActivity extends FragmentActivity implements
      */
     @Override
     public void onArrivalsForStopFetched(List<Arrival> arrivals) {
-        this.mStopSlide.showPanel();
+        // UI stuff
     }
 
     /**
@@ -316,6 +314,7 @@ public class MapsActivity extends FragmentActivity implements
                 : new LatLng(location.getLatitude(),
                 location.getLongitude());
 
+        mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.setMyLocationEnabled(true);
 
         CameraPosition cameraPosition = new CameraPosition.Builder()
@@ -333,15 +332,6 @@ public class MapsActivity extends FragmentActivity implements
                 return false;
             }
         });
-        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
-            @Override
-            public void onMapClick(LatLng latLng) {
-                SlidingUpPanelLayout slider = MapsActivity.this.mStopSlide;
-                if (slider != null && !slider.isPanelHidden()) {
-                    slider.hidePanel();
-                }
-            }
-        });
     }
 
     /**
@@ -352,37 +342,6 @@ public class MapsActivity extends FragmentActivity implements
             mMap.addMarker(new MarkerOptions()
                     .position(new LatLng(s.Lat, s.Long)));
         }
-    }
-
-    private void setUpStopSlider() {
-        mStopSlide = (SlidingUpPanelLayout) findViewById(R.id.route_slide);
-        mStopSlide.hidePanel();
-        mStopSlide.setPanelSlideListener(new SlidingUpPanelLayout.PanelSlideListener() {
-            @Override
-            public void onPanelSlide(View view, float v) {
-
-            }
-
-            @Override
-            public void onPanelCollapsed(View view) {
-
-            }
-
-            @Override
-            public void onPanelExpanded(View view) {
-
-            }
-
-            @Override
-            public void onPanelAnchored(View view) {
-
-            }
-
-            @Override
-            public void onPanelHidden(View view) {
-
-            }
-        });
     }
 
     /**

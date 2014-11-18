@@ -3,5 +3,10 @@
 
     <string name="app_name">CT</string>
     <string name="title_activity_maps">CT</string>
+    <string name="title_activity_routes">CTS Routes</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_search">Search</string>
+    <string name="title_activity_route_view">Route</string>
 
 </resources>

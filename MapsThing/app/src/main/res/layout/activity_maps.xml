@@ -1,83 +1,28 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fab="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MapsActivity">
 
-    <com.sothree.slidinguppanel.SlidingUpPanelLayout xmlns:sothree="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/route_slide"
+    <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:gravity="bottom"
-        sothree:panelHeight="68dp"
-        sothree:shadowHeight="4dp">
+        android:layout_height="match_parent" />
 
-        <!-- Main Content -->
-        <fragment xmlns:android="http://schemas.android.com/apk/res/android"
-            xmlns:tools="http://schemas.android.com/tools"
-            android:id="@+id/map"
-            android:name="com.google.android.gms.maps.SupportMapFragment"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <!-- Sliding layout -->
-        <LinearLayout
-            android:id="@+id/dragView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#eeeeee"
-            android:clickable="true"
-            android:focusable="false"
-            android:orientation="vertical">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="68dp"
-                android:orientation="horizontal">
-
-                <LinearLayout
-                    android:id="@+id/stopinfolayout"
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:layout_weight="8"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/eta_text"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:paddingLeft="10dp"
-                        android:text="5 Minutes"
-                        android:textSize="28sp"/>
-
-                    <TextView
-                        android:id="@+id/stop_name"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center_horizontal"
-                        android:text="NW Witham Hill Dr and NW Woodland Dr"/>
-
-                </LinearLayout>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent"
-                    android:paddingRight="15dp"
-                    android:text="8"
-                    android:textSize="45sp"
-                    android:layout_gravity="center"
-                    android:layout_weight="2"/>
-
-            </LinearLayout>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center|top"
-                android:text="Hey more stop stuff goes here eventually"
-                android:textSize="16sp" />
-        </LinearLayout>
-    </com.sothree.slidinguppanel.SlidingUpPanelLayout>
+    <com.getbase.floatingactionbutton.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignRight="@id/map"
+        android:layout_alignEnd="@id/map"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="16dp"
+        fab:fab_colorNormal="@color/primary"
+        fab:fab_colorPressed="@color/primary_pressed"
+        fab:fab_icon="@drawable/list_icon_white" />
 </RelativeLayout>
 
