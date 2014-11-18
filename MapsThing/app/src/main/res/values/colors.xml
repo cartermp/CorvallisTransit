@@ -10,4 +10,22 @@
     <color name="pink_pressed">#ec407a</color>
     <color name="blue_semi_transparent">#805677fc</color>
     <color name="blue_semi_transparent_pressed">#80738ffe</color>
+
+    <!-- CTS Colors, but Material Design'd -->
+    <color name="route_1_color">#2196F3</color>
+    <color name="route_2_color">#673AB7</color>
+    <color name="route_3_color">#FF5722</color>
+    <color name="route_4_color">#4CAF50</color>
+    <color name="route_5_color">#9C27B0</color>
+    <color name="route_6_color">#3F51B5</color>
+    <color name="route_7_color">#F44336</color>
+    <color name="route_8_color">#4CAF50</color>
+    <color name="route_NON_color">#009688</color>
+    <color name="route_NOSE_color">#FF9800</color>
+    <color name="route_NOSW_color">#2196F3</color>
+    <color name="route_C1_color">#795548</color>
+    <color name="route_C1R_color">#795548</color>
+    <color name="route_C2_color">#2196F3</color>
+    <color name="route_C3_color">#EC407A</color>
+    <color name="route_CVA_color">#673AB7</color>
 </resources>

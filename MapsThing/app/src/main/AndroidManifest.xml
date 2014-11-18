@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="phillipcarter.com.mapsthing" >
+    package="phillipcarter.com.mapsthing">
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
             android:name=".ui.MapsActivity"
-            android:label="@string/title_activity_maps" >
+            android:label="@string/title_activity_maps">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,19 +27,12 @@
         <activity
             android:name=".ui.RoutesActivity"
             android:label="@string/title_activity_routes"
-            android:parentActivityName=".ui.MapsActivity" >
+            android:parentActivityName=".ui.MapsActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="phillipcarter.com.mapsthing.ui.MapsActivity" />
         </activity>
-        <activity
-            android:name=".ui.RouteViewActivity"
-            android:label="@string/title_activity_route_view"
-            android:parentActivityName=".ui.RoutesActivity" >
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="phillipcarter.com.mapsthing.ui.RoutesActivity" />
-        </activity>
+
     </application>
 
     <uses-permission android:name="android.permission.INTERNET" />

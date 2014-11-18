@@ -8,12 +8,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import org.w3c.dom.Text;
-
 import java.util.List;
 
-import butterknife.ButterKnife;
-import butterknife.InjectView;
 import phillipcarter.com.mapsthing.R;
 import phillipcarter.com.mapsthing.model.Route;
 
